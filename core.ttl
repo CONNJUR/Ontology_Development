@@ -1,0 +1,114 @@
+@prefix nmrbox: <https://github.com/CONNJUR/Ontology_Development> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix event: <http://purl.org/NET/c4dm/event.owl#> .
+@prefix dctype: <http://purl.org/dc/dcmitype/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix tl: <http://purl.org/NET/c4dm/timeline.owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+　
+　
+# The NMR spectrum is that it is an event.
+#  At a particular point in space-time a scientist inserts the sample, applies the pulsed experiment,
+#    and the spectrometer records the emission over a certain duration. (seconds to days.) 
+#  The emission is analog, but the spectrometer quickly digitizes the signal, down-samples it and 
+#    stores the numerical representation in a digital file.  There will be many digital copies of the file.
+#  The various ways of storing numbers and ordering of points in a data stream will complicate things.
+#    My first pass at the identity condition is that any equivalent digital representation of the same
+#    "event" is the same NMR spectrum.
+　
+# myNMRSpectrum is a generalized instance of such a recording of the NMR spectrum.
+　
+nmrbox:myNMRSpectrum  
+	a event:event ;
+	event:agent [					#Spectroscopist who conducts experiment
+		a foaf:Person ;
+		foaf:name "Michael Gryk";
+		];
+	nmrbox:laboratory	"UCONN Health" ;	#NMR equipment is not portable.
+	nmrbox:dimension "1"
+	nmrbox:dimension "2"
+	nmrbox:channel "1"
+	nmrbox:channel "2"
+	nmrbox:channel "3"
+	nmrbox:channel "4"
+	event:time [					#NMR experiment start time and duration
+		a tl:Interval ;
+		tl:at "2002-03-15T09:15:00"^^xsd:dateTime ;
+		tl:duration "PT1H"^^xsd:duration ;
+		] .
+		
+nmrbox:dimension :isComponentOf nmrbox:classNMRSpectrum ;
+	:composedOf nmrbox:samplePoints
+	:spans	nmrbox:spectralWidth
+	:has	nmrbox:constantPhase
+	:has	nmrbox:linearPhase
+	:has	nmrbox:pivotPoint
+	
+nmrbox:spectrometer :uses  nmrbox:channelX
+	:uses nmrbox:channelY
+	:uses nmrbox:channelZ
+	nmrbox:laboratory "UCONN Health"
+	
+nmrbox:channelX rdfs:SubclassOf nmrbox:channel
+	nmrbox:baseNucleus "1H"
+	nmrbox:baseFrequency "599.996"
+	nmrbox:baseFrequencyUnits "MHz"
+　
+# Two major ways of representing NMR spectrum.
+#  Time domain - trace of decaying sinusoids in time
+#  Frequency domain - intensity of signal vs. frequency (Hz, or relative units)
+# These two representations are mathematical duals.
+		
+nmrbox:myNMRTimeDomain nmrbox:isTimeRepresentationOf nmrbox:myNMRSpectrum ;
+				 nmrbox:isSampledUsing		 nmrbox:mySamplingScheme ;
+				 nmrbox:composedOf			 nmrbox:dimension;
+				 :uses					 nmrbox:channel;
+				 rdf:type				 nmrbox:classNMRTimeDomain .
+　
+nmrbox:myNMRFreqDomain nmrbox:isFreqRepresentationOf nmrbox:myNMRSpectrum ;
+				 nmrbox:hasResolution	"0.1" ;
+				 nmrbox:hasResolutionUnits "Hz/Pt" ;
+				 nmrbox:hasSweepWidth "3000" ;
+				 nmrbox:hasSweepWidthUnits "Hz" ;
+				 rdf:type				 nmrbox:classNMRFreqDomain .
+　
+# Duality between time and frequency will be expressed as class relationship				 
+				 
+nmrbox:classNMRTimeDomain nmrbox:isDualOf		nmrbox:classNMRFreqDomain ;
+					rdfs:SubClassOf	nmrbox:classNMRSpectrum.
+　
+nmrbox:classNMRFreqDomain nmrbox:isDualOf		nmrbox:classNMRTimeDomain ;
+					rdfs:SubClassOf	nmrbox:classNMRSpectrum.
+					
+# Processing / DataCleaning Events
+　
+nmrbox:myFourierTransform1 a event:event
+	a prov:Activity
+	:uses nmrbox:classNMRTimeDomain
+	:generates nmrbox:classNMRFreqDomain
+	rdfs:SubClassOf nmrbox:classFourierTransform
+	wasAssociatedWith bruker:TopSpin
+	
+nmrbox:myFourierTransform2 a event:event
+	a prov:Activity
+	:uses nmrbox:classNMRTimeDomain
+	:generates nmrbox:classNMRFreqDomain
+	rdfs:SubClassOf nmrbox:classFourierTransform
+	wasAssociatedWith varian:VNMRJ
+　
+# Last four here present whole-part issues.
+　
+# An NMRSpectram Event is the superposition of several things.
+#  NMRSignals (what we're looking for), Artifacts (false signals, shadows), Noise, Distortions.
+　
+nmrbox:myNMRSpectrum		:composedOf		nmrbox:myNMRSignalSet .
+　
+nmrbox:myNMRSignalSet		:emanatesFrom	nmrbox:myNucleusSet .
+　
+nmrbox:myNucleusSet		:comprises		nmrbox:myProtein ;
+					nmrbox:coupledWith	nmrbox:myNucleusSet .
+					
+　
