@@ -1,0 +1,20 @@
+@prefix bruker: <https://github.com/CONNJUR/Ontology_Development/bruker.ttl>
+@prefix nmrbox: <https://github.com/CONNJUR/Ontology_Development/core.ttl> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix event: <http://purl.org/NET/c4dm/event.owl#> .
+@prefix dctype: <http://purl.org/dc/dcmitype/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix tl: <http://purl.org/NET/c4dm/timeline.owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+　
+bruker:td :isSameAs nmrbox:samplePoints
+bruker:sw :isSameAs nmrbox:spectralWidth
+bruker:bw :isSameAs nmrbox:baseFrequency
+bruker:phc0 :isSameAs nmrbox:constantPhase
+bruker:phc1 :isSameAs nmrbox:linearPhase
+nmrbox:pivotPoint	:derivedFrom	bruker:firstPoint
+bruker:TopSpin a prov:Agent
+	:usesPositiveSign :classFourierTransform
